@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DHT22 Telemetry — Panel Sensor</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.10.1/mqtt.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="rack">
+
+  <!-- Header -->
+  <div class="headband">
+    <div>
+      <h1>DHT<span>22</span>_TELEMETRY</h1>
+      <small>Panel Monitoring Sensor &middot; MQTT Realtime</small>
+    </div>
+    <div class="led-status">
+      <span class="led" id="led"></span>
+      <span id="statusText">TERPUTUS</span>
+    </div>
+  </div>
+
+  <!-- Config -->
+  <div class="config-panel">
+    <div class="row g-3 align-items-end">
+      <div class="col-6 col-md-3">
+        <label class="lbl">Broker (WebSocket)</label>
+        <input type="text" class="form-control" id="brokerUrl" value="wss://broker.hivemq.com:8884/mqtt">
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="lbl">Topic Data</label>
+        <input type="text" class="form-control" id="topicData" value="my-dht/esp32/dht22/data">
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="lbl">Topic Status</label>
+        <input type="text" class="form-control" id="topicStatus" value="my-dht/esp32/dht22/status">
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="lbl">Ambang (&deg;C)</label>
+        <input type="text" class="form-control" id="thresholdInput" value="36.0" >
+      </div>
+      <div class="col-12 col-md-3 d-flex gap-2">
+        <button class="btn btn-phosphor flex-fill" id="connectBtn">Hubungkan</button>
+        <button class="btn btn-phosphor flex-fill" id="disconnectBtn" disabled>Putuskan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alarm -->
+  <div class="alarm-banner" id="alarmBanner">
+    &#9888; SUHU MELEBIHI AMBANG BATAS — BUZZER AKTIF DI PERANGKAT
+  </div>
+
+  <!-- Main gauges -->
+  <div class="row g-3">
+    <div class="col-12 col-md-5">
+      <div class="gauge-card">
+        <div class="lbl">Suhu Realtime</div>
+        <svg viewBox="0 0 300 175" width="100%" style="max-width:280px;">
+          <!-- arc track -->
+          <path d="M 30 150 A 120 120 0 0 1 270 150" fill="none" stroke="#1c342b" stroke-width="14" stroke-linecap="round"/>
+          <path id="arcFill" d="M 30 150 A 120 120 0 0 1 270 150" fill="none" stroke="#2a8f5f" stroke-width="14" stroke-linecap="round"
+                stroke-dasharray="377" stroke-dashoffset="377"/>
+          <!-- ticks -->
+          <g id="ticks" stroke="#3a5c4d" stroke-width="2"></g>
+          <!-- needle -->
+          <line id="needle" x1="150" y1="150" x2="150" y2="45" stroke="#4dffa0" stroke-width="3" transform="rotate(-90 150 150)"/>
+          <circle cx="150" cy="150" r="7" fill="#4dffa0"/>
+        </svg>
+        <div class="gauge-reading" id="tempReading">--.- &deg;C</div>
+        <div class="gauge-sub" id="tempTimestamp">Menunggu data...</div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-7">
+      <div class="metric">
+        <div class="lbl"><span>Kelembaban</span><span id="humLbl">--</span></div>
+        <div class="val" id="humVal">--.- <small>%RH</small></div>
+        <div class="bar-track"><div class="bar-fill" id="humBar"></div></div>
+      </div>
+      <div class="row g-3">
+        <div class="col-6">
+          <div class="metric mb-0">
+            <div class="lbl">Fahrenheit</div>
+            <div class="val" id="fVal">--.- <small>&deg;F</small></div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="metric mb-0">
+            <div class="lbl">Kelvin</div>
+            <div class="val" id="kVal">---.- <small>K</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log -->
+  <div class="section-title">Log Transmisi</div>
+  <div class="log-panel" id="logPanel">
+    <div class="log-line"><span class="t">[SYS]</span> Menunggu koneksi MQTT...</div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
